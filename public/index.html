@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>China Store - Product Management & Sales Reports</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #DE2910 0%, #FFDE00 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #DE2910;
+        }
+        
+        h1 { color: #DE2910; font-size: 2.5rem; }
+        h2 { color: #DE2910; margin: 30px 0 15px; }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #DE2910, #FFDE00);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-value { font-size: 2rem; font-weight: bold; }
+        .stat-label { font-size: 0.9rem; opacity: 0.9; }
+        
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .btn-primary {
+            background: #DE2910;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .btn-primary:hover { background: #b01f0a; }
+        
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .product-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        .product-card:hover {
+            border-color: #DE2910;
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(222,41,16,0.3);
+        }
+        
+        .product-name { font-size: 1.3rem; font-weight: bold; color: #333; margin-bottom: 10px; }
+        .product-price { font-size: 1.5rem; color: #DE2910; font-weight: bold; margin: 10px 0; }
+        .product-stock { color: #666; font-size: 0.9rem; }
+        .product-category { background: #f0f0f0; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; display: inline-block; margin-top: 10px; }
+        
+        .edit-btn {
+            width: 100%;
+            padding: 12px;
+            background: #FFDE00;
+            color: #333;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        
+        .edit-btn:hover { background: #e6c800; }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        th {
+            background: #DE2910;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        tr:hover { background: #f9f9f9; }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: white;
+            max-width: 500px;
+            margin: 100px auto;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #DE2910;
+        }
+        
+        .btn-secondary {
+            background: #ccc;
+            color: #333;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        
+        .success-msg {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .error-msg {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .badge-sync { background: #d1ecf1; color: #0c5460; }
+        
+        .sync-metrics {
+            background: linear-gradient(135deg, #ffe4e1, #fff8dc);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-left: 4px solid #DE2910;
+        }
+        
+        .sync-metric-row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .sync-metric-item {
+            text-align: center;
+        }
+        
+        .sync-metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #DE2910;
+        }
+        
+        .sync-metric-label {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .sync-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .sync-status.active {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .sync-status.idle {
+            background: #fff3cd;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🇨🇳 China Store - Product Management</h1>
+            <p>Manage products and view sales from India</p>
+        </header>
+
+        <!-- Statistics -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="totalProducts">0</div>
+                <div class="stat-label">My Products</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="indiaSales">0</div>
+                <div class="stat-label">Sales from India</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalRevenue">$0</div>
+                <div class="stat-label">Total Revenue</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="productsSoldIndia">0</div>
+                <div class="stat-label">Products Sold in India</div>
+            </div>
+        </div>
+
+        <!-- Sync Metrics -->
+        <div class="sync-metrics">
+            <h3>⚡ Real-Time Sync Status <span class="sync-status active" id="syncStatus">Syncing</span></h3>
+            <p style="color: #666; margin-top: 10px;">Sales & Stock Updates sync from India → China</p>
+            <div class="sync-metric-row">
+                <div class="sync-metric-item">
+                    <div class="sync-metric-value" id="syncLatency">--</div>
+                    <div class="sync-metric-label">Avg Sync Time (All)</div>
+                </div>
+                <div class="sync-metric-item">
+                    <div class="sync-metric-value" id="avgLastMinute">--</div>
+                    <div class="sync-metric-label">Avg Last Minute</div>
+                </div>
+                <div class="sync-metric-item">
+                    <div class="sync-metric-value" id="lastSyncLatency">--</div>
+                    <div class="sync-metric-label">Last Sync</div>
+                </div>
+                <div class="sync-metric-item">
+                    <div class="sync-metric-value" id="syncCount">--</div>
+                    <div class="sync-metric-label">Syncs (Last Min)</div>
+                </div>
+                <div class="sync-metric-item">
+                    <div class="sync-metric-value" id="lastSyncTime">--</div>
+                    <div class="sync-metric-label">Last Sync At</div>
+                </div>
+            </div>
+            <div style="margin-top:15px;font-size:0.85rem;color:#666;">
+                <strong>Recent Syncs:</strong> <span id="recentSyncsList">Loading...</span>
+            </div>
+        </div>
+
+        <!-- Product Management -->
+        <div class="action-bar">
+            <h2>📦 My Products</h2>
+            <button class="btn-primary" onclick="openAddProductModal()">+ Add New Product</button>
+        </div>
+        
+        <div id="productsGrid" class="products-grid">
+            <p>Loading products...</p>
+        </div>
+
+        <!-- Sales from India -->
+        <h2>💰 Sales Data from India <span class="badge badge-sync">Auto-Synced from India</span></h2>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Date</th>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Unit Price</th>
+                        <th>Total</th>
+                        <th>Customer</th>
+                        <th>Region</th>
+                    </tr>
+                </thead>
+                <tbody id="salesTable">
+                    <tr><td colspan="8" style="text-align:center;">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add Product Modal -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle">➕ Add New Product</h2>
+            <form id="productForm" onsubmit="submitProduct(event)">
+                <input type="hidden" id="productId">
+                <input type="hidden" id="isEdit">
+                
+                <div class="form-group">
+                    <label>Product Name *</label>
+                    <input type="text" id="productName" required placeholder="Enter product name">
+                </div>
+                
+                <div class="form-group">
+                    <label>Created By</label>
+                    <select id="createdBy" required>
+                        <option value="">Select creator...</option>
+                    </select>
+                    <small style="color:#666;">🔒 Local only - not shared with India</small>
+                </div>
+                
+                <div class="form-group">
+                    <label>Price ($) *</label>
+                    <input type="number" id="price" step="0.01" min="0" required placeholder="0.00">
+                </div>
+                
+                <div class="form-group">
+                    <label>Stock Quantity *</label>
+                    <input type="number" id="stock" min="0" required placeholder="0">
+                </div>
+                
+                <div class="form-group">
+                    <label>Category</label>
+                    <input type="text" id="category" placeholder="e.g., Electronics, Clothing">
+                </div>
+                
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="description" rows="3" placeholder="Product description"></textarea>
+                </div>
+                
+                <div>
+                    <button type="submit" class="btn-primary">Save Product</button>
+                    <button type="button" onclick="closeProductModal()" class="btn-secondary">Cancel</button>
+                </div>
+                
+                <div id="successMsg" class="success-msg"></div>
+                <div id="errorMsg" class="error-msg"></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '';
+        let users = [];
+
+        // Authentication functions
+        function checkAuth() {
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                window.location.href = '/login';
+                return false;
+            }
+            return token;
+        }
+
+        async function fetchWithAuth(url, options = {}) {
+            const token = checkAuth();
+            if (!token) return null;
+            
+            const response = await fetch(url, {
+                ...options,
+                headers: {
+                    ...options.headers,
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            if (response.status === 401 || response.status === 403) {
+                localStorage.clear();
+                window.location.href = '/login';
+                return null;
+            }
+            
+            return response;
+        }
+
+        function logout() {
+            fetchWithAuth('/api/auth/logout', { method: 'POST' })
+                .then(() => {
+                    localStorage.clear();
+                    window.location.href = '/login';
+                })
+                .catch(() => {
+                    localStorage.clear();
+                    window.location.href = '/login';
+                });
+        }
+
+        function addLogoutButton() {
+            const header = document.querySelector('header');
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const logoutDiv = document.createElement('div');
+            logoutDiv.style.cssText = 'text-align:right;margin-top:10px;';
+            logoutDiv.innerHTML = `
+                <span style="margin-right:15px;font-weight:600;">👤 ${user.full_name || user.username} (${user.role})</span>
+                <button onclick="logout()" style="padding:8px 16px;background:#DC3545;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:600;">
+                    Logout
+                </button>
+            `;
+            header.appendChild(logoutDiv);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            if (checkAuth()) {
+                addLogoutButton();
+                loadData();
+                setInterval(loadData, 5000);
+            }
+        });
+
+        async function loadData() {
+            await Promise.all([
+                loadProducts(),
+                loadSalesFromIndia(),
+                loadUsers(),
+                loadStats(),
+                loadSyncMetrics()
+            ]);
+        }
+
+        async function loadUsers() {
+            try {
+                const response = await fetchWithAuth(`${API_BASE}/api/users`);
+                const data = await response.json();
+                users = data.users;
+            } catch (error) {
+                console.error('Error loading users:', error);
+            }
+        }
+
+        async function loadProducts() {
+            try {
+                const response = await fetchWithAuth(`${API_BASE}/api/products`);
+                const data = await response.json();
+                
+                const grid = document.getElementById('productsGrid');
+                
+                if (data.products.length === 0) {
+                    grid.innerHTML = '<p style="text-align:center;color:#666;">No products yet. Add your first product!</p>';
+                    return;
+                }
+                
+                document.getElementById('totalProducts').textContent = data.products.length;
+                
+                grid.innerHTML = data.products.map(product => `
+                    <div class="product-card">
+                        <div class="product-name">${product.product_name}</div>
+                        <div class="product-price">$${parseFloat(product.price).toFixed(2)}</div>
+                        <div class="product-stock">Stock: ${product.stock_quantity} units</div>
+                        ${product.category ? `<div class="product-category">${product.category}</div>` : ''}
+                        ${product.creator_username ? `<div style="margin-top:10px;font-size:0.85rem;color:#666;">By: ${product.creator_username}</div>` : ''}
+                        <button class="edit-btn" onclick="editProduct(${product.id})">✏️ Edit Product</button>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading products:', error);
+            }
+        }
+
+        async function loadSalesFromIndia() {
+            try {
+                const response = await fetchWithAuth(`${API_BASE}/api/sales`);
+                const data = await response.json();
+                
+                const tbody = document.getElementById('salesTable');
+                
+                if (data.sales.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">No sales from India yet</td></tr>';
+                    return;
+                }
+                
+                document.getElementById('indiaSales').textContent = data.sales.length;
+                
+                tbody.innerHTML = data.sales.slice(0, 50).map(sale => `
+                    <tr>
+                        <td>${sale.id}</td>
+                        <td>${new Date(sale.sale_date).toLocaleDateString()}</td>
+                        <td>${sale.product_name}</td>
+                        <td>${sale.quantity}</td>
+                        <td>$${parseFloat(sale.unit_price || 0).toFixed(2)}</td>
+                        <td><strong>$${parseFloat(sale.total_amount).toFixed(2)}</strong></td>
+                        <td>${sale.customer_name || 'N/A'}</td>
+                        <td><span class="badge badge-sync">India</span></td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading sales:', error);
+            }
+        }
+
+        async function loadStats() {
+            try {
+                const response = await fetchWithAuth(`${API_BASE}/api/stats`);
+                const data = await response.json();
+                
+                document.getElementById('totalRevenue').textContent = '$' + data.sales.revenue.toFixed(2);
+                document.getElementById('productsSoldIndia').textContent = data.sales.count;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function loadSyncMetrics() {
+            try {
+                const response = await fetchWithAuth(`${API_BASE}/api/stats/sync`);
+                const data = await response.json();
+                
+                // Update sync metrics
+                document.getElementById('syncLatency').textContent = 
+                    data.avgLatencyMs ? `${data.avgLatencyMs}ms` : '--';
+                document.getElementById('avgLastMinute').textContent = 
+                    data.avgLastMinuteMs ? `${data.avgLastMinuteMs}ms` : '--';
+                document.getElementById('lastSyncLatency').textContent = 
+                    data.lastSyncLatencyMs ? `${data.lastSyncLatencyMs}ms` : '--';
+                document.getElementById('syncCount').textContent = 
+                    data.syncsLastMinute || 0;
+                
+                // Format recent syncs list
+                if (data.recentSyncs && data.recentSyncs.length > 0) {
+                    const recentList = data.recentSyncs.slice(0, 5).map(sync => {
+                        const table = sync.table === 'products' ? '📦' : sync.table === 'sales' ? '💰' : '👤';
+                        return `${table} ${sync.table}#${sync.recordId} (${sync.latencyMs}ms)`;
+                    }).join(' • ');
+                    document.getElementById('recentSyncsList').textContent = recentList;
+                } else {
+                    document.getElementById('recentSyncsList').textContent = 'No recent syncs';
+                }
+                
+                // Format last sync time
+                if (data.lastSyncTime) {
+                    const lastSync = new Date(data.lastSyncTime);
+                    const now = new Date();
+                    const diffSeconds = Math.floor((now - lastSync) / 1000);
+                    
+                    let timeText;
+                    if (diffSeconds < 60) {
+                        timeText = `${diffSeconds}s ago`;
+                    } else if (diffSeconds < 3600) {
+                        timeText = `${Math.floor(diffSeconds / 60)}m ago`;
+                    } else {
+                        timeText = lastSync.toLocaleTimeString();
+                    }
+                    document.getElementById('lastSyncTime').textContent = timeText;
+                    
+                    // Update status badge
+                    const syncStatus = document.getElementById('syncStatus');
+                    if (diffSeconds < 60) {
+                        syncStatus.textContent = '✓ Active';
+                        syncStatus.className = 'sync-status active';
+                    } else {
+                        syncStatus.textContent = '⏸ Idle';
+                        syncStatus.className = 'sync-status idle';
+                    }
+                } else {
+                    document.getElementById('lastSyncTime').textContent = 'Never';
+                    document.getElementById('syncStatus').textContent = '⏸ Waiting';
+                    document.getElementById('syncStatus').className = 'sync-status idle';
+                }
+            } catch (error) {
+                console.error('Error loading sync metrics:', error);
+            }
+        }
+
+        function openAddProductModal() {
+            document.getElementById('modalTitle').textContent = '➕ Add New Product';
+            document.getElementById('productForm').reset();
+            document.getElementById('productId').value = '';
+            document.getElementById('isEdit').value = 'false';
+            
+            // Populate creators dropdown
+            const select = document.getElementById('createdBy');
+            select.innerHTML = '<option value="">Select creator...</option>' +
+                users.map(u => `<option value="${u.id}">${u.full_name} (${u.username})</option>`).join('');
+            
+            document.getElementById('successMsg').style.display = 'none';
+            document.getElementById('errorMsg').style.display = 'none';
+            document.getElementById('productModal').style.display = 'block';
+        }
+
+        async function editProduct(productId) {
+            try {
+                const response = await fetchWithAuth(`${API_BASE}/api/products`);
+                const data = await response.json();
+                const product = data.products.find(p => p.id === productId);
+                
+                if (!product) {
+                    alert('Product not found');
+                    return;
+                }
+                
+                document.getElementById('modalTitle').textContent = '✏️ Edit Product';
+                document.getElementById('productId').value = product.id;
+                document.getElementById('isEdit').value = 'true';
+                document.getElementById('productName').value = product.product_name;
+                document.getElementById('price').value = product.price;
+                document.getElementById('stock').value = product.stock_quantity;
+                document.getElementById('category').value = product.category || '';
+                document.getElementById('description').value = product.description || '';
+                
+                // Populate creators dropdown
+                const select = document.getElementById('createdBy');
+                select.innerHTML = '<option value="">Select creator...</option>' +
+                    users.map(u => `<option value="${u.id}" ${product.created_by_user_id === u.id ? 'selected' : ''}>${u.full_name} (${u.username})</option>`).join('');
+                
+                document.getElementById('successMsg').style.display = 'none';
+                document.getElementById('errorMsg').style.display = 'none';
+                document.getElementById('productModal').style.display = 'block';
+            } catch (error) {
+                alert('Error loading product: ' + error.message);
+            }
+        }
+
+        function closeProductModal() {
+            document.getElementById('productModal').style.display = 'none';
+        }
+
+        async function submitProduct(event) {
+            event.preventDefault();
+            
+            const isEdit = document.getElementById('isEdit').value === 'true';
+            const productId = document.getElementById('productId').value;
+            const productName = document.getElementById('productName').value;
+            const createdBy = document.getElementById('createdBy').value;
+            const price = document.getElementById('price').value;
+            const stock = document.getElementById('stock').value;
+            const category = document.getElementById('category').value;
+            const description = document.getElementById('description').value;
+            
+            const successMsg = document.getElementById('successMsg');
+            const errorMsg = document.getElementById('errorMsg');
+            
+            const productData = {
+                product_name: productName,
+                created_by_user_id: parseInt(createdBy),
+                price: parseFloat(price),
+                stock_quantity: parseInt(stock),
+                category: category || null,
+                description: description || null
+            };
+            
+            try {
+                const url = isEdit 
+                    ? `${API_BASE}/api/products/${productId}`
+                    : `${API_BASE}/api/products`;
+                    
+                const response = await fetchWithAuth(url, {
+                    method: isEdit ? 'PUT' : 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(productData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    successMsg.textContent = isEdit 
+                        ? '✅ Product updated successfully! Syncing to India...'
+                        : '✅ Product created successfully! Syncing to India...';
+                    successMsg.style.display = 'block';
+                    errorMsg.style.display = 'none';
+                    
+                    setTimeout(() => {
+                        loadData();
+                        closeProductModal();
+                    }, 2000);
+                } else {
+                    errorMsg.textContent = '❌ Error: ' + (data.error || 'Failed to save product');
+                    errorMsg.style.display = 'block';
+                    successMsg.style.display = 'none';
+                }
+            } catch (error) {
+                errorMsg.textContent = '❌ Network error: ' + error.message;
+                errorMsg.style.display = 'block';
+                successMsg.style.display = 'none';
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('productModal');
+            if (event.target === modal) {
+                closeProductModal();
+            }
+        }
+    </script>
+</body>
+</html>
+
