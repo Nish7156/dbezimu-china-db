@@ -32,7 +32,14 @@ module.exports = {
   kafka: {
     broker: process.env.KAFKA_BROKER || 'kafka:9092',
     clientId: 'china-backend',
-    groupId: 'china-sync-consumer'
+    groupId: 'china-sync-consumer',
+    // Additional Kafka client configuration
+    retry: {
+      initialRetryTime: 300,
+      retries: 15,
+      maxRetryTime: 30000,
+      multiplier: 2
+    }
   }
 };
 

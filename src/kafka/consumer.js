@@ -2,6 +2,13 @@ const { Kafka } = require('kafkajs');
 const { resolveConflict } = require('./conflictResolver');
 const config = require('../config/config');
 
+// Log Kafka broker for debugging
+console.log('🔍 Kafka Broker Config:', {
+  env: process.env.KAFKA_BROKER,
+  config: config.kafka.broker,
+  clientId: config.kafka.clientId || 'china-backend'
+});
+
 const kafka = new Kafka({
   clientId: config.kafka.clientId || 'china-backend',
   brokers: [config.kafka.broker],
