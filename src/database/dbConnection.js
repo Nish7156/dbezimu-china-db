@@ -2,7 +2,11 @@ const { Pool } = require('pg');
 const config = require('../config/config');
 
 // Create connection pool for China database
-const pool = new Pool(config.db);
+// Enable SSL for Render PostgreSQL
+const pool = new Pool({
+  ...config.db,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+});
 
 pool.on('connect', () => {
   console.log('✅ Connected to China database');
