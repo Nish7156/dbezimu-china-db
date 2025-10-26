@@ -28,9 +28,9 @@ module.exports = {
   // API Key (for admin access)
   apiKey: process.env.API_KEY || 'china_api_key_change_in_production',
   
-  // Kafka
+  // Kafka - Hardcoded for Render deployment
   kafka: {
-    broker: process.env.KAFKA_BROKER || 'kafka:9092',
+    broker: process.env.KAFKA_BROKER || '31.97.232.235:9092',
     clientId: 'china-backend',
     groupId: 'china-sync-consumer',
     // Additional Kafka client configuration
